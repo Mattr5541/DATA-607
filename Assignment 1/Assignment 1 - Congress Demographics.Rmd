@@ -1,0 +1,54 @@
+---
+title: "Assignment 1 - Congress Demograhpics"
+output: html_document
+date: "2023-09-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+congage <- read.csv("data_aging_congress.csv")
+
+congage_short <- congage %>% select(congress, chamber, start_date,
+                                    age_years, birthday, generation,
+                                    state_abbrev, cmltv_cong)
+
+
+congage_short <- congage_short %>% rename(cumulative_congress_terms = 
+                                            cmltv_cong)
+
+congage_short <- congage_short %>% rename(state_abbreviations = state_abbrev)
+```
+
+
+## Introduction
+
+The article "Congress Today Is Older Than It's Ever Been" (https://fivethirtyeight.com/features/aging-congress-boomers/) discusses the generational composition of Congress throughout the 20th and 21st centuries. Specifically, it outlines the trend in the ages of elected officials and compares them, of course, concluding that our current 118th congress is, on average, composed the oldest members in U.S. history, with a median age of 59 years old. I believe that this topic is very important in our current age, as this age disparity may be reflective of a gap between the ideals and values of our representatives and the general population.
+
+## Conclusions
+
+This article provided an interesting insight into the demographic trends of our elected representatives, noting that the average age of our representatives is increasing over time in both the House and Senate. Again, this trend highlights the disconnect between our population and our Congress. For instance, the interests of our older representatives may not align with the younger generation, bolstering the need for younger individuals to enter into Congress.
+
+This article included a myriad of visual representations that highlighted the age of congress throughout the years, as well as the generational distribution, and how the Baby Boomer generation has a significant presence compared to Generation X, Millenials, and Generation Z. However, one suggestion that I have would be to visualize the current generational distribution by state. I believe that this could demonstrate the weight that different states have in terms of electing and reelecting older generations versus newer generations 
+
+The graph shown below demonstrates that nearly all U.S. states have a tendency to elect and re-elect officials from the Baby Boomer generation, as well as Generation X. However, states such as New York and Texas appear to have the largest proportion of Millennial representatives in the U.S. Furthermore, some states, such as Indiana, Washington, and Texas, appear to have a larger pool of Generation X representatives compared to Baby Boomer representatives. Overall, this graph suggests that the current trend in the general age of our elected representatives is, in fact, a national matter. However, some states most definitely contain a larger proportion of younger representatives when compared to others.
+
+```{r cars}
+congcurr <- congage_short %>% subset(congress == 118)
+
+congcurr_count <- congcurr %>% group_by(state_abbreviations, generation, age_years) %>% summarize(freq = n())
+
+
+ggplot(congcurr_count, aes(x = state_abbreviations, y = freq, fill = generation)) +
+  geom_bar(position = "stack", stat = "identity") + scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title = "Generation by State", x = "State", y = "Frequency")
+###Note, I found the scale_x_discrete() code online on the following website: https://datavizpyr.com/how-to-dodge-overlapping-text-on-x-axis-labels-in-ggplot2/
+```
+
