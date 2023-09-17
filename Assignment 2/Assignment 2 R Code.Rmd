@@ -1,0 +1,84 @@
+---
+title: "Assignment 2 R Code"
+output:
+  html_document:
+    df_print: paged
+date: "2023-09-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("RSQLite")
+#install.packages("DBI")
+#install.packages("mice")
+library(dplyr)
+library(tidyverse)
+library(RSQLite)
+library(mice)
+```
+
+### Code to load my SQL database into R
+this will obviously not be reproducible, since this is from my system
+
+Note: The solution I used was based on the following website: https://library.virginia.edu/data/articles/creating-a-sqlite-database-for-use-with-r#:~:text=Connect%20to%20the%20database%20in%20R&text=We%20establish%20the%20database%20connection,database%20that%20we%20just%20created.
+
+```{r, SuppressWarnings()}
+Movies_db <- dbConnect(RSQLite::SQLite(), dbname = "C:/Users/Matt/Documents/607 - Assignment 2/Movies.db")
+
+Movies <- tbl(Movies_db, "Movies")
+```
+
+##This will pull the SQL database into R, fully
+```{r}
+Movies_df <- Movies %>% collect()
+
+Movies_df <- data_frame(Movies_df)
+
+Movies_df
+```
+
+##The following code will be used to perform mean substitutions for all of my variables
+```{r}
+Movies_Impute <- Movies_df
+##Mean substitution for Spider_Man_Across_the_Spiderverse
+Mean_Spider_Man_Across_the_Spiderverse <- mean(Movies_df$Spider_Man_Across_the_Spiderverse, na.rm = T)
+
+
+Movies_Impute$Spider_Man_Across_the_Spiderverse[is.na(Movies_Impute$Spider_Man_Across_the_Spiderverse)] <- Mean_Spider_Man_Across_the_Spiderverse
+
+##Mean substitution for Barbie
+Mean_Barbie <- mean(Movies_df$Barbie, na.rm = T)
+
+
+Movies_Impute$Barbie[is.na(Movies_Impute$Barbie)] <- Mean_Barbie
+
+##Mean substitution for Oppenheimer
+Mean_Oppenheimer <- mean(Movies_df$Oppenheimer, na.rm = T)
+
+
+Movies_Impute$Oppenheimer[is.na(Movies_Impute$Oppenheimer)] <- Mean_Oppenheimer
+
+##Mean substitution for The_Little_Mermaid
+Mean_The_Little_Mermaid <- mean(Movies_df$The_Little_Mermaid, na.rm = T)
+
+
+Movies_Impute$The_Little_Mermaid[is.na(Movies_Impute$The_Little_Mermaid)] <- Mean_The_Little_Mermaid
+
+
+##Mean substitution for Blue_Beetle
+Mean_Blue_Beetle <- mean(Movies_df$Blue_Beetle, na.rm = T)
+
+
+Movies_Impute$Blue_Beetle[is.na(Movies_Impute$Blue_Beetle)] <- Mean_Blue_Beetle
+
+
+##Mean substitution for John_Wick_Chapter_4
+Mean_John_Wick_Chapter_4 <- mean(Movies_df$John_Wick_Chapter_4, na.rm = T)
+
+
+Movies_Impute$John_Wick_Chapter_4[is.na(Movies_Impute$John_Wick_Chapter_4)] <- Mean_John_Wick_Chapter_4
+
+Movies_Impute
+```
+
