@@ -1,0 +1,100 @@
+---
+title: "Week 5 Assignment"
+author: "Matthew Roland"
+date: "2023-09-27"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(knitr)
+library(ggplot2)
+```
+
+## Loading & Cleaning the Data
+
+```{r}
+##This code will load the csv from my github repo
+flight_data <- read.csv("https://raw.githubusercontent.com/Mattr5541/DATA-607/main/Week%205/Flight_Data.csv")
+
+##This will change any empty strings to NA
+flight_data[flight_data == ""] <- NA
+
+##Delete any rows that are completely populated by NA values
+flight_data <- flight_data %>% filter(rowSums(is.na(.)) != ncol(flight_data))
+
+##I want this dataset to exist in a long format, so I am populating any empty rows in the X column with the names of the airports
+flight_data <- flight_data %>% fill(everything(), .direction = "down")
+
+##Finally, I want to rename the variables for the sake of readability and consistency
+flight_data <- flight_data %>% rename(Airport = X, Arrival = X.1, Los_Angeles = Los.Angeles, San_Diego = San.Diego, San_Francisco = San.Francisco)
+
+kable(flight_data)
+```
+
+## Converting from wide to long
+
+```{r}
+##This will pivot the data from wide to long
+flight_long <- flight_data %>% pivot_longer(
+  cols = -c(Airport, Arrival),
+  names_to = "City",
+  values_to = "Value"
+)
+
+kable(flight_long)
+```
+
+## Now let's finish off with an analysis
+
+**First, I admittedly thought about finding mean and median values for the data...but then I realized that proportion/percentages would likely be more appropriate for this type of frequency database**
+```{r}
+
+##This will create group sums for arrivals by airport, without respect to city
+arrive_sum <- flight_long %>% group_by(Airport, Arrival) %>% 
+  summarize(Sum = sum(Value)) 
+
+##This will calculate the sums for Alaska and AM West separately and put them into a new data frame
+arrive_totals <- arrive_sum %>% group_by(Airport) %>%
+  summarize(Totals = sum(Sum))
+
+##Now, I will merge that dataframe into the arrive_sum dataframe so I can perform some calculations
+arrive_sum <- arrive_sum %>% merge(arrive_totals, by = "Airport")
+
+##And here are the calculations: Specifically, I want to divide the sums for on-time vs. delays by the total amount of arrivals for AM West and Alaska. This will generate proportions for on-time arrivals vs. delays. And, of course, I converted those proportions into percentages, for the sake of readbaility
+arrive_sum <- arrive_sum %>% mutate(Proportion = round((Sum / Totals) * 100, 2))
+
+##And now, I want to drop the Totals column, since it was only for the sake of computation
+arrive_sum <- arrive_sum %>% select(-c("Totals"))
+##And I felt like adding a % string to the end of every value
+arrive_sum$Proportion <- paste0(arrive_sum$Proportion, "%")
+
+kable(arrive_sum)
+```
+**As we can see here, Alaska airlines had a slightly higher percentage of delays when compared to AM West. Overall, however, both AM West and Alaska airlines had a relatively consistent proportion of on-time arrivals compared to delays**
+
+##Visual Representation
+```{r}
+ggplot(arrive_sum, aes(x = Airport, y = Sum, fill = Arrival)) +
+  geom_bar(stat = "identity", color = "black", position = position_dodge()) + theme_minimal() + labs(title = "Arrivals and Delays between Alaska Airlines and AM West", y = "Frequency")
+
+ggplot(arrive_sum, aes(x = Airport, y = Proportion, fill = Arrival)) +
+  geom_bar(stat = "identity", color = "black", position = position_dodge()) + theme_minimal() + labs(title = "Arrivals and Delays between Alaska Airlines and AM West", y = "Proportion")
+```
+
+**And finally, graphic representation of the frequency counts for arrivals and delays by city**
+
+```{r}
+flight_arrive <- flight_long %>% subset(Arrival != "delayed")
+
+ggplot(flight_arrive, aes(x = City, y = Value, fill = Airport)) + geom_bar(stat = "identity", position = position_dodge()) + theme_minimal() + labs(title = "Arrivals by City", y = "Frequency") + scale_fill_brewer(palette = "Greens")
+
+flight_delays <- flight_long %>% subset(Arrival != "on time")
+
+ggplot(flight_delays, aes(x = City, y = Value, fill = Airport)) + geom_bar(stat = "identity", position = position_dodge()) + theme_minimal() + labs(title = "Delays by City", y = "Frequency") + scale_fill_brewer(palette = "Reds")
+```
+**And with this, we can see that AM West flights from Phoenix have the largest amount of on-time arrivals, but also the largest amount of delays**
