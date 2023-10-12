@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+  <book>
+    <Title>DUNE</Title>
+    <Author>Frank Herbert</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>1965</Release>
+    <Sales>20,000,000</Sales>
+    <AdaptedIntoMovie>y</AdaptedIntoMovie>
+  </book>
+  <book>
+    <Title>The Three Body Problem</Title>
+    <Author>Liu Cixin</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>2008</Release>
+    <Sales>8,000,000</Sales>
+    <Adapted_Into_Movie_Format>n</Adapted_Into_Movie_Format>
+  </book>
+  <book>
+    <Title>Hyperion</Title>
+    <Author>Dan Simmons</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>1989</Release>
+    <Sales>1,000,000</Sales>
+    <Adapted_Into_Movie_Format>n</Adapted_Into_Movie_Format>
+  </book>
+</books>
