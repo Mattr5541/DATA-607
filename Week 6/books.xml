@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+  <book>
+    <Title>DUNE</Title>
+    <Author>Frank Herbert</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>1965</Release>
+    <Sales>20,000,000</Sales>
+    <Adapted_Into_Movie_Format>y</Adapted_Into_Movie_Format>
+  </book>
+  <book>
+    <Title>The Three Body Problem</Title>
+    <Author>Liu Cixin</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>2008</Release>
+    <Sales>8,000,000</Sales>
+    <Adapted_Into_Movie_Format>n</Adapted_Into_Movie_Format>
+  </book>
+  <book>
+    <Title>The Long Earth</Title>
+    <Author>Terry Pratchett and Stephen Baxter</Author>
+    <Genre>Sci-Fi</Genre>
+    <Release>2012</Release>
+    <Sales>100,000,000</Sales>
+    <Adapted_Into_Movie_Format>n</Adapted_Into_Movie_Format>
+  </book>
+</books>
