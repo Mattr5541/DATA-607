@@ -1,0 +1,80 @@
+---
+title: "Assignment 6"
+author: "Matthew Roland"
+date: "2023-10-12"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# install.packages("rjson")
+# install.packages("rvest")
+# install.packages("jsonlite")
+# install.packages("XML")
+# install.packages("methods")
+
+library(rjson)
+library(rvest)
+library(jsonlite)
+library(XML)
+library(xml2)
+library(methods)
+library(RCurl)
+library(knitr)
+```
+
+## Loading the HTML, JSON, & XML files into R
+
+```{r}
+###HTML
+
+##This will load the table as a list containing the head and body. To fix this, I will need a handy bit of code that can reconvert this list into a table
+
+books_html <- read_html("https://raw.githubusercontent.com/Mattr5541/DATA-607/main/Week%206/books.html")
+
+##Now the lists will be condensed into a singular list containing the table laid out in a more organized manner. Of course, I still need to convert this into an R dataframe for completeness
+
+books_html <- html_table(books_html)
+
+
+
+books_html <- as.data.frame(books_html[[1]])
+kable(books_html)
+
+###JSON
+
+##THis code will load the json table into R. However, it seems to convert the sales values into scientific notation. Let's fix that
+books_json <- fromJSON("https://raw.githubusercontent.com/Mattr5541/DATA-607/main/Week%206/books_new.json")
+
+books_json$`Sales (estimate)` <- format(books_json$`Sales (estimate)`, scientific = F)
+
+kable(books_json)
+
+
+###XML
+
+##And finally, let's load in an XML table
+
+books_xml <- read_xml("https://raw.githubusercontent.com/Mattr5541/DATA-607/main/Week%206/books.xml")
+
+##But it saved every element in the schema as a list, so I'll have to do something that's a little less straightforward than the html table, but it should be manageable
+
+Title <- xml_text(xml_find_all(books_xml, "//Title"))
+Author <- xml_text(xml_find_all(books_xml, "//Author"))
+Genre <- xml_text(xml_find_all(books_xml, "//Genre"))
+Release <- xml_text(xml_find_all(books_xml, "//Release"))
+`Sales (estimate)` <- xml_text(xml_find_all(books_xml, "//Sales"))
+Adapted_Into_Movie_Format <- xml_text(xml_find_all(books_xml, "//Adapted_Into_Movie_Format"))
+
+books_xml <- data.frame(Title = Title, 
+                Author = Author, 
+                Genre = Genre, 
+                Release = as.numeric(Release),
+                `Sales (estimate)` = `Sales (estimate)`, Adapted_Into_Movie_Format = Adapted_Into_Movie_Format)
+
+kable(books_xml)
+```
+
+**So, to summarize the results of this exercise, the three dataframes were not entirely identical, and required some cleaning for standardization purposes. However, they were all rather similar.**
