@@ -1,0 +1,73 @@
+---
+title: "DATA 607 Week 9 Assignment"
+author: "Matthew Roland"
+date: "2023-10-25"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("devtools")
+#library(devtools)
+#devtools::install_github("mkearney/nytimes")
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(jsonlite)
+library(knitr)
+```
+
+## Article Search API
+
+For this assignment, I will be using the NYTimes Books API to return a list of all the NYT Best Sellers, and then I will convert the resultant JSON file into an R dataframe.
+
+##Running the API
+```{r}
+##This code will generte a JSON format list containing historical data pertaining to some of the NYT best sellers from the pat decade (CONFIRM)
+
+nyt <- fromJSON("https://api.nytimes.com/svc/books/v3/lists/best-sellers/history.json?api-key=PCBxRC5IDGa5YL921cADZrhRF0J3B7Bm", flatten = T)
+
+##And now I will convert the JSON list into a dataframe
+nyt <- data.frame(nyt)
+
+kable(nyt)
+
+```
+
+ As we can see, this generates a rather unorganized (and incomplete) dataframe consisting of empty and nested columns (and even empty, nested columns)
+Of course, it is necessary to clean and tidy all of these datapoints
+
+```{r}
+##First, I want to remove the "results." prefix
+
+colnames(nyt) <- sub("^results.", "", colnames(nyt))
+
+nyt_unnest <- nyt %>% unnest_wider(c("ranks_history", "reviews", "isbns"))
+
+#dropping the primary isbn variables, since they contain the same information contained within the nested isbn variable (and the nested variable seems to contain more complete observations)
+
+nyt_unnest <- subset(nyt_unnest, select = -c(primary_isbn10, primary_isbn13))
+
+
+nyt_unnest <- nyt_unnest %>% unnest_longer(isbn10)
+nyt_unnest <- nyt_unnest %>% unnest_longer(isbn13)
+nyt_unnest <- nyt_unnest %>% unnest_longer(rank)
+nyt_unnest <- nyt_unnest %>% unnest_longer(list_name)
+nyt_unnest <- nyt_unnest %>% unnest_longer(display_name)
+nyt_unnest <- nyt_unnest %>% unnest_longer(published_date)
+nyt_unnest <- nyt_unnest %>% unnest_longer(bestsellers_date)
+nyt_unnest <- nyt_unnest %>% unnest_longer(weeks_on_list)
+nyt_unnest <- nyt_unnest %>% unnest_longer(rank_last_week)
+nyt_unnest <- nyt_unnest %>% unnest_longer(asterisk)
+nyt_unnest <- nyt_unnest %>% unnest_longer(dagger)
+
+glimpse(nyt_unnest)
+
+nyt_unnest[nyt_unnest == ""] <- NA
+
+```
+
+And with that, we are left with a very, very large (albeit analyzable) unnested dataset
